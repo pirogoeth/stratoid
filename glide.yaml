@@ -5,3 +5,5 @@ import:
 - package: github.com/mailgun/holster
   subpackages:
   - errors
+- package: github.com/BurntSushi/toml
+  version: ^0.3.0

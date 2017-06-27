@@ -1,0 +1,23 @@
+[[pool]]
+name = "minergate-bcn"
+address = "stratum+tcp://bcn.pool.minergate.com:45550"
+username = "user@example.org"
+password = "x"
+
+[[pool]]
+name = "minergate-xdn"
+address = "stratum+tcp://xdn.pool.minergate.com:45620"
+username = "user@example.org"
+password = "x"
+
+[[worker]]
+username = "htx-home-tower"
+
+    [[pool]]
+    name = "minergate-bcn"
+
+[[worker]]
+username = "sat-home-tower"
+
+    [[pool]]
+    name = "minergate-xdn"

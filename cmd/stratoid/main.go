@@ -71,19 +71,25 @@ func listenAction(ctx *cli.Context) error {
 		return errors.Wrap(err, "while opening listener socket")
 	}
 
+	log.Infof("Starting accept loop on %s", listenAddr)
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			return errors.Wrap(err, "while accepting socket connection")
 		}
 
+		log.Debugf("Handling connection from: %s", conn.RemoteAddr().String())
+
 		go handleConnection(conn)
 	}
 }
 
 func handleConnection(client net.Conn) {
+	defer client.Close()
+
 	for {
-		data := make([]byte, 0)
+		data := make([]byte, 1024)
 		count, err := client.Read(data)
 		if err != nil {
 			log.WithError(err).Errorf("Failed reading data from connection, shutting down")
@@ -92,6 +98,11 @@ func handleConnection(client net.Conn) {
 				log.WithError(err).Errorf("Failed while shutting down connection")
 			}
 
+			return
+		}
+
+		if data == nil {
+			log.Warnf("Received empty payload from client, closing connection")
 			return
 		}
 

@@ -1,10 +1,21 @@
-hash: 218d8b6f3fa0e93d5851f806252750a4e47e908329ded224cfca5aed240aeff1
-updated: 2017-06-26T23:13:24.234217157-05:00
+hash: 2f371c0d3ff65a84c4017fe13e22cfdc10aef8c27b03bc13c5e58b36838bf958
+updated: 2017-06-27T00:13:19.558153228-05:00
 imports:
+- name: github.com/BurntSushi/toml
+  version: b26d9c308763d68093482582cea63d69be07a0f0
 - name: github.com/mailgun/holster
   version: 93ac6fbc7af61baa4b6784dc4bddfb17d0e7f117
   subpackages:
   - errors
+  - stack
+- name: github.com/pkg/errors
+  version: c605e284fe17294bda444b34710735b29d1a9d90
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: golang.org/x/sys
+  version: f7928cfef4d09d1b080aa2b6fd3ca9ba1567c733
+  subpackages:
+  - unix
 - name: gopkg.in/urfave/cli.v1
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 testImports: []
