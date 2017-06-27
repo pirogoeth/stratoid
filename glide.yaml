@@ -1,0 +1,7 @@
+package: github.com/pirogoeth/stratoid
+import:
+- package: gopkg.in/urfave/cli.v1
+  version: ~1.19.1
+- package: github.com/mailgun/holster
+  subpackages:
+  - errors
