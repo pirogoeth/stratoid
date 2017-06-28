@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
+	"path/filepath"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/mailgun/holster/errors"
 	"gopkg.in/urfave/cli.v1"
 
-	"github.com/mailgun/holster/errors"
+	"github.com/pirogoeth/stratoid/config"
+	"github.com/pirogoeth/stratoid/server"
 )
 
 var (
@@ -41,6 +43,11 @@ func main() {
 			Usage: "Server listen port",
 			Value: 65432,
 		},
+		cli.StringFlag{
+			Name:  "config, c",
+			Usage: "Path to configuration file",
+			Value: "./config.toml",
+		},
 	}
 
 	app.Before = func(ctx *cli.Context) error {
@@ -52,6 +59,18 @@ func main() {
 			log.Debug("Verbose logging enabled")
 		}
 
+		configPath, err := filepath.Abs(ctx.String("config"))
+		if err != nil {
+			log.WithError(err).Fatalf("Can not expand file path '%s'", ctx.String("config"))
+		}
+
+		config := &config.C{}
+		if err = config.ReadConfig(configPath); err != nil {
+			log.WithError(err).Fatalf("Could not read configuration file %s", configPath)
+		}
+
+		app.Metadata["config"] = config
+
 		return nil
 	}
 
@@ -62,50 +81,19 @@ func main() {
 }
 
 func listenAction(ctx *cli.Context) error {
+	config, ok := ctx.App.Metadata["config"].(*config.C)
+	if !ok {
+		return errors.Errorf("Could not load configuration")
+	}
+
 	addrStr := ctx.String("listen-address")
 	port := ctx.Int("listen-port")
 
 	listenAddr := fmt.Sprintf("%s:%d", addrStr, port)
-	listener, err := net.Listen("tcp", listenAddr)
+	err := server.Listen(config, listenAddr)
 	if err != nil {
-		return errors.Wrap(err, "while opening listener socket")
+		return errors.Wrap(err, "while running server")
 	}
 
-	log.Infof("Starting accept loop on %s", listenAddr)
-
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			return errors.Wrap(err, "while accepting socket connection")
-		}
-
-		log.Debugf("Handling connection from: %s", conn.RemoteAddr().String())
-
-		go handleConnection(conn)
-	}
-}
-
-func handleConnection(client net.Conn) {
-	defer client.Close()
-
-	for {
-		data := make([]byte, 1024)
-		count, err := client.Read(data)
-		if err != nil {
-			log.WithError(err).Errorf("Failed reading data from connection, shutting down")
-			err = client.Close()
-			if err != nil {
-				log.WithError(err).Errorf("Failed while shutting down connection")
-			}
-
-			return
-		}
-
-		if data == nil {
-			log.Warnf("Received empty payload from client, closing connection")
-			return
-		}
-
-		fmt.Printf("received payload (%d bytes): %s\n", count, data)
-	}
+	return nil
 }

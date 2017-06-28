@@ -3,21 +3,23 @@ name = "minergate-bcn"
 address = "stratum+tcp://bcn.pool.minergate.com:45550"
 username = "user@example.org"
 password = "x"
+timeout = 5
 
 [[pool]]
 name = "minergate-xdn"
 address = "stratum+tcp://xdn.pool.minergate.com:45620"
 username = "user@example.org"
 password = "x"
+timeout = 5
 
 [[worker]]
 username = "htx-home-tower"
 
-    [[pool]]
+    [worker.pool]
     name = "minergate-bcn"
 
 [[worker]]
 username = "sat-home-tower"
 
-    [[pool]]
-    name = "minergate-xdn"
+    [worker.pool]
+    name = "minergate-bcn"
