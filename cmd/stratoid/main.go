@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 
@@ -48,6 +50,15 @@ func main() {
 			Usage: "Path to configuration file",
 			Value: "./config.toml",
 		},
+		cli.BoolFlag{
+			Name:  "profile, x",
+			Usage: "Enable golang's pprof profiling extension",
+		},
+		cli.StringFlag{
+			Name:  "profiler-address, X",
+			Usage: "Address pprof HTTP server should listen on",
+			Value: "localhost:6060",
+		},
 	}
 
 	app.Before = func(ctx *cli.Context) error {
@@ -70,6 +81,16 @@ func main() {
 		}
 
 		app.Metadata["config"] = config
+
+		// ---
+		launchProf := ctx.Bool("profile")
+		if launchProf {
+			addr := ctx.String("profiler-address")
+			log.WithField("pprofAddr", addr).Infof("Launch pprof runtime profiler")
+			go func() {
+				log.WithError(http.ListenAndServe(addr, nil)).Warnf("Could not start pprof")
+			}()
+		}
 
 		return nil
 	}
